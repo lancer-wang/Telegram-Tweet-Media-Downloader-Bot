@@ -59,7 +59,9 @@ class tMsgText:
             logging.debug(f"Mapping URLs to download and respond to")
             # Map() returns an iterator, and won't process any elements until told to.
             # Use the list() to force all elements to be processed
-            list(map(lambda x: self.handleDownloadOutcome(self.downloadUrl(x)), urls))
+            for url in urls:
+                asyncio.run(self.downloadUrl(url))
+            # list(map(lambda x: self.handleDownloadOutcome(self.downloadUrl(x)), urls))
         else:
             logging.info(f"Replying couldn't find URL to userID {self.isfrom['id']}")
             self.reply([False, "Couldn't find a valid URL to use"])
@@ -72,10 +74,15 @@ class tMsgText:
         return urls
     
 
-    def downloadUrl(self, url: str) -> tuple[str, int]:
+    async def downloadUrl(self, url: str) -> tuple[str, int]:
         logging.info(f"Attempting to gallery-dl download content from: {url}")
         output = subprocess.run(f"gallery-dl \"{url}\"",shell=True, capture_output=True,text=True)
         recode = output.returncode
+        nums = 0
+        res = []
+        # create a semaphore with 10 permits
+        sem = asyncio.Semaphore(3)
+        tasks = []
         if output.returncode == 0 and self.conf.sendTg == "2" and self.conf.cChatid !="":
             outs = output.stdout.replace("#","").replace(" ","").split("\n")
             logging.info(outs)
@@ -86,17 +93,28 @@ class tMsgText:
                 if out == "":
                     continue
                 res.append(out)
-                if nums >=5:
-                    asyncio.run(self.sender.sendMultipleFiles(res,self.chat['id'],chat_id2=self.conf.cChatid)) # 将任务添加到列表中
+                if nums >=3:
+                    task = asyncio.create_task(self.sender.sendMultipleFiles(res, self.chat['id'],sem))
+                    tasks.append(task)
+                    # asyncio.run(self.sender.sendMultipleFiles(res,self.chat['id'],chat_id2=self.conf.cChatid)) # 将任务添加到列表中
                     # self.sender.sendMultipleFiles(res,self.chat['id'],chat_id2=self.conf.cChatid)
                     res = []
                     nums = 0
-                    self.sender.sendSilentMessage(f"-----------------------", self.chat['id'])
+                    # self.sender.sendSilentMessage(f"-----------------------", self.chat['id'])
             if res !=[]:
-                asyncio.run(self.sender.sendMultipleFiles(res,self.chat['id'],chat_id2=self.conf.cChatid)) # 将任务添加到列表中
-            
-        return (url, recode)
-    
+                task = asyncio.create_task(self.sender.sendMultipleFiles(res, self.chat['id'],sem))
+                tasks.append(task)
+                # asyncio.run(self.sender.sendMultipleFiles(res,self.chat['id'],chat_id2=self.conf.cChatid)) # 将任务添加到列表中
+            await asyncio.gather(*tasks)
+            # release all permits
+        # return (url, recode)
+        match recode:
+            case 0: 
+                logging.info(f"Replying success for {url} to userID {self.isfrom['id']}")
+                self.reply([True, url])
+            case _: 
+                logging.info(f"Replying failed download for {url} to userID {self.isfrom['id']}")
+                self.reply([False, f"Encountered an error whilst downloading content for {url}"])
 
     def handleDownloadOutcome(self, downloadResult: tuple[str, int]) -> None:
         match downloadResult[1]:

@@ -110,38 +110,40 @@ class tMsgSender:
     #     response = requests.post(request_url, json=request_params)
     #     logging.info(response)
 
-    async def sendMultipleFiles(self, file_paths, chat_id: str, chat_id2: str):
-        # Create an updater object with your bot token
-        # updater = Updater(token=self.tAPIUrl)
-        bot = telegram.Bot(token=self.token)
-        # Get the bot instance from the updater
-        # bot = updater.bot
-        # Create an empty list to store the media group
-        media_group = []
+    async def sendMultipleFiles(self, file_paths, chat_id: str,sem):
+        async with sem:
+            # Create an updater object with your bot token
+            # updater = Updater(token=self.tAPIUrl)
+            bot = telegram.Bot(token=self.token)
+            # Get the bot instance from the updater
+            # bot = updater.bot
+            # Create an empty list to store the media group
+            media_group = []
 
-        # Loop through the local media list, upload the files according to their type, and get the file_id
-        for i,file_path in enumerate(file_paths):
-            try:
-                # Check the file type, if it is an image, use send_photo method and photo parameter
-                # 判断文件类型，如果是图片，就创建一个InputMediaPhoto对象
-                if file_path.endswith((".png", ".jpg", ".jpeg")):
-                    # media = InputMediaPhoto(open(file_path, "rb"))
-                    await bot.send_photo(chat_id=chat_id, photo=(open(file_path, "rb")))
-                # 如果是视频，就创建一个InputMediaVideo对象
-                elif file_path.endswith((".mp4", ".avi", ".mov")):
-                    # media = InputMediaVideo(open(file_path, "rb"))
-                    await bot.send_video(chat_id, video=(open(file_path, "rb")))
-                # 如果是其他类型，就文件
-                else:
-                    # media = InputMediaDocument(open(file_path, "rb"))
-                    await bot.send_document(chat_id, document=open(file_path, "rb"))
-            except Exception as e:
-                logging.warn(file_path)
-                logging.warn(e)
-                continue
-            # 把媒体对象添加到媒体组列表中
-            # media_group.append(media)
-            # Add the uploaded media information to the media group, up to 10
+            # Loop through the local media list, upload the files according to their type, and get the file_id
+            for i,file_path in enumerate(file_paths):
+                try:
+                    # Check the file type, if it is an image, use send_photo method and photo parameter
+                    # 判断文件类型，如果是图片，就创建一个InputMediaPhoto对象
+                    if file_path.endswith((".png", ".jpg", ".jpeg")):
+                        # media = InputMediaPhoto(open(file_path, "rb"))
+                        await bot.send_photo(chat_id=chat_id, photo=(open(file_path, "rb")))
+                    # 如果是视频，就创建一个InputMediaVideo对象
+                    elif file_path.endswith((".mp4", ".avi", ".mov")):
+                        # media = InputMediaVideo(open(file_path, "rb"))
+                        await bot.send_video(chat_id, video=(open(file_path, "rb")))
+                    # 如果是其他类型，就文件
+                    else:
+                        # media = InputMediaDocument(open(file_path, "rb"))
+                        await bot.send_document(chat_id, document=open(file_path, "rb"))
+                except Exception as e:
+                    logging.warn(file_path)
+                    logging.warn(e)
+                    continue
+                # 把媒体对象添加到媒体组列表中
+                # media_group.append(media)
+                # Add the uploaded media information to the media group, up to 10
+            self.sendSilentMessage(f"-----------------------", chat_id)
         # try:
         #     await bot.send_media_group(chat_id=chat_id, media=media_group)
         # except Exception as e:

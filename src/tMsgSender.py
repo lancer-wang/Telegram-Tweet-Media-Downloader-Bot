@@ -143,24 +143,26 @@ class tMsgSender:
                 # Add the uploaded media information to the media group, up to 10
             try:
                 await bot.send_media_group(chat_id=chat_id, media=media_group)
+                await bot.send_message(chat_id=chat_id, text="-----------------------")
             except Exception as e:
                 logging.warn(e)
-                for _, file_path2 in enumerate(file_paths):
-                    try:
-                        # Check the file type, if it is an image, use send_photo method and photo parameter
-                        # 判断文件类型，如果是图片，就创建一个InputMediaPhoto对象
-                        if file_path2.endswith((".png", ".jpg", ".jpeg")):
-                            await bot.send_photo(chat_id=chat_id, photo=(open(file_path2, "rb")))
-                        # 如果是视频，就创建一个InputMediaVideo对象
-                        elif file_path2.endswith((".mp4", ".avi", ".mov")):
-                            await bot.send_video(chat_id, video=(open(file_path2, "rb")))
-                        # 如果是其他类型，就文件
-                        else:
-                            await bot.send_document(chat_id, document=open(file_path2, "rb"))
-                    except Exception as e:
-                        logging.warn(file_path2)
-                        logging.warn(e)
-                        continue
+                # for _, file_path2 in enumerate(file_paths):
+                #     try:
+                #         # Check the file type, if it is an image, use send_photo method and photo parameter
+                #         # 判断文件类型，如果是图片，就创建一个InputMediaPhoto对象
+                #         if file_path2.endswith((".png", ".jpg", ".jpeg")):
+                #             await bot.send_photo(chat_id=chat_id, photo=(open(file_path2, "rb")))
+                #         # 如果是视频，就创建一个InputMediaVideo对象
+                #         elif file_path2.endswith((".mp4", ".avi", ".mov")):
+                #             await bot.send_video(chat_id, video=(open(file_path2, "rb")))
+                #         # 如果是其他类型，就文件
+                #         else:
+                #             await bot.send_document(chat_id, document=open(file_path2, "rb"))
+                #     except Exception as e:
+                #         logging.warn(file_path2)
+                #         logging.warn(e)
+                #         continue
+            await asyncio.sleep(12)
         # try:
         #     await bot.send_media_group(chat_id=chat_id, media=media_group)
         # except Exception as e:

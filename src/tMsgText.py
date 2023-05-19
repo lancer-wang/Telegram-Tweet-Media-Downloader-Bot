@@ -94,7 +94,7 @@ class tMsgText:
                     if out == "":
                         continue
                     res.append(out)
-                    if nums >=3:
+                    if nums >=4:
                         task = asyncio.create_task(self.sender.sendMultipleFiles(res, self.chat['id'],sem))
                         tasks.append(task)
                         # asyncio.run(self.sender.sendMultipleFiles(res,self.chat['id'],chat_id2=self.conf.cChatid)) # 将任务添加到列表中

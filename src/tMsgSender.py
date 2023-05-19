@@ -143,7 +143,8 @@ class tMsgSender:
                 # Add the uploaded media information to the media group, up to 10
             try:
                 await bot.send_media_group(chat_id=chat_id, media=media_group)
-                await bot.send_message(chat_id=chat_id, text="-----------------------")
+                self.sendSilentMessage(f"-----------------------",chat_id=chat_id)
+                # await bot.send_message(chat_id=chat_id, text="-----------------------")
             except Exception as e:
                 logging.warn(e)
                 # for _, file_path2 in enumerate(file_paths):

@@ -84,28 +84,31 @@ class tMsgText:
         sem = asyncio.Semaphore(3)
         tasks = []
         if output.returncode == 0 and self.conf.sendTg == "2" and self.conf.cChatid !="":
-            outs = output.stdout.replace("#","").replace(" ","").split("\n")
-            logging.info(outs)
-            res = []
-            nums = 0
-            for out in outs:
-                nums +=1
-                if out == "":
-                    continue
-                res.append(out)
-                if nums >=3:
+            try:
+                outs = output.stdout.replace("#","").replace(" ","").split("\n")
+                logging.info(outs)
+                res = []
+                nums = 0
+                for out in outs:
+                    nums +=1
+                    if out == "":
+                        continue
+                    res.append(out)
+                    if nums >=3:
+                        task = asyncio.create_task(self.sender.sendMultipleFiles(res, self.chat['id'],sem))
+                        tasks.append(task)
+                        # asyncio.run(self.sender.sendMultipleFiles(res,self.chat['id'],chat_id2=self.conf.cChatid)) # 将任务添加到列表中
+                        # self.sender.sendMultipleFiles(res,self.chat['id'],chat_id2=self.conf.cChatid)
+                        res = []
+                        nums = 0
+                        # self.sender.sendSilentMessage(f"-----------------------", self.chat['id'])
+                if res !=[]:
                     task = asyncio.create_task(self.sender.sendMultipleFiles(res, self.chat['id'],sem))
                     tasks.append(task)
                     # asyncio.run(self.sender.sendMultipleFiles(res,self.chat['id'],chat_id2=self.conf.cChatid)) # 将任务添加到列表中
-                    # self.sender.sendMultipleFiles(res,self.chat['id'],chat_id2=self.conf.cChatid)
-                    res = []
-                    nums = 0
-                    # self.sender.sendSilentMessage(f"-----------------------", self.chat['id'])
-            if res !=[]:
-                task = asyncio.create_task(self.sender.sendMultipleFiles(res, self.chat['id'],sem))
-                tasks.append(task)
-                # asyncio.run(self.sender.sendMultipleFiles(res,self.chat['id'],chat_id2=self.conf.cChatid)) # 将任务添加到列表中
-            await asyncio.gather(*tasks)
+                await asyncio.gather(*tasks)
+            except Exception as e:
+                logging.warn(e)
             # release all permits
         # return (url, recode)
         match recode:

@@ -81,7 +81,7 @@ class tMsgText:
         nums = 0
         res = []
         # create a semaphore with 10 permits
-        sem = asyncio.Semaphore(3)
+        sem = asyncio.Semaphore(2)
         tasks = []
         if output.returncode == 0 and self.conf.sendTg == "2" and self.conf.cChatid !="":
             try:
@@ -94,7 +94,7 @@ class tMsgText:
                     if out == "":
                         continue
                     res.append(out)
-                    if nums >=4:
+                    if nums >=5:
                         task = asyncio.create_task(self.sender.sendMultipleFiles(res, self.chat['id'],sem))
                         tasks.append(task)
                         # asyncio.run(self.sender.sendMultipleFiles(res,self.chat['id'],chat_id2=self.conf.cChatid)) # 将任务添加到列表中

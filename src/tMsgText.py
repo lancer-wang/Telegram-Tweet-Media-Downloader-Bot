@@ -80,8 +80,9 @@ class tMsgText:
         recode = output.returncode
         nums = 0
         res = []
+        # tg 有速率限制，似乎是一分钟20个
         # create a semaphore with 10 permits
-        sem = asyncio.Semaphore(1)
+        sem = asyncio.Semaphore(2)
         tasks = []
         if output.returncode == 0 and self.conf.sendTg == "2" and self.conf.cChatid !="":
             try:

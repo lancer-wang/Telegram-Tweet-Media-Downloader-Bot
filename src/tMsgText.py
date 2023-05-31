@@ -81,9 +81,8 @@ class tMsgText:
         nums = 0
         res = []
         # tg 有速率限制，似乎是一分钟20个
-        # create a semaphore with 10 permits
-        sem = asyncio.Semaphore(2)
-        tasks = []
+        # sem = asyncio.Semaphore(2)
+        # tasks = []
         if output.returncode == 0 and self.conf.sendTg == "2" and self.conf.cChatid !="":
             try:
                 outs = output.stdout.replace("#","").replace(" ","").split("\n")
@@ -96,18 +95,19 @@ class tMsgText:
                         continue
                     res.append(out)
                     if nums >=5:
-                        task = asyncio.create_task(self.sender.sendMultipleFiles(res, self.chat['id'],sem))
-                        tasks.append(task)
-                        # asyncio.run(self.sender.sendMultipleFiles(res,self.chat['id'],chat_id2=self.conf.cChatid)) # 将任务添加到列表中
-                        # self.sender.sendMultipleFiles(res,self.chat['id'],chat_id2=self.conf.cChatid)
+                        # task = asyncio.create_task(self.sender.sendMultipleFiles(res, self.chat['id'],sem))
+                        # tasks.append(task)
+
+                        self.sender.sendMultipleFiles(res,self.chat['id'],chat_id2=self.conf.cChatid)
                         res = []
                         nums = 0
                         # self.sender.sendSilentMessage(f"-----------------------", self.chat['id'])
                 if res !=[]:
-                    task = asyncio.create_task(self.sender.sendMultipleFiles(res, self.chat['id'],sem))
-                    tasks.append(task)
-                    # asyncio.run(self.sender.sendMultipleFiles(res,self.chat['id'],chat_id2=self.conf.cChatid)) # 将任务添加到列表中
-                await asyncio.gather(*tasks)
+                    # task = asyncio.create_task(self.sender.sendMultipleFiles(res, self.chat['id'],sem))
+                    # tasks.append(task)
+
+                    self.sender.sendMultipleFiles(res,self.chat['id'],chat_id2=self.conf.cChatid)
+                # await asyncio.gather(*tasks)
             except Exception as e:
                 logging.warn(e)
             # release all permits

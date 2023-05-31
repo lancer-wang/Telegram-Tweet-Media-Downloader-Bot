@@ -163,7 +163,7 @@ class tMsgSender:
                 #         logging.warn(file_path2)
                 #         logging.warn(e)
                 #         continue
-            await asyncio.sleep(20)
+            await asyncio.sleep(30)
         # try:
         #     await bot.send_media_group(chat_id=chat_id, media=media_group)
         # except Exception as e:

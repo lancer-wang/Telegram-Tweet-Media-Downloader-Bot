@@ -81,7 +81,7 @@ class tMsgText:
         nums = 0
         res = []
         # create a semaphore with 10 permits
-        sem = asyncio.Semaphore(2)
+        sem = asyncio.Semaphore(1)
         tasks = []
         if output.returncode == 0 and self.conf.sendTg == "2" and self.conf.cChatid !="":
             try:

@@ -1,7 +1,7 @@
 from tMsgSender import tMsgSender
 from config import Config
 import os, re, logging,subprocess,asyncio
-
+from func_timeout import func_set_timeout
 class tMsgText:
     def __init__(self, message: dict, sender: tMsgSender, conf: Config):
         self.message: dict = message
@@ -76,7 +76,12 @@ class tMsgText:
 
     async def downloadUrl(self, url: str) -> tuple[str, int]:
         logging.info(f"Attempting to gallery-dl download content from: {url}")
-        output = subprocess.run(f"gallery-dl \"{url}\"",shell=True, capture_output=True,text=True)
+        try:
+            output = subprocess.run(f"gallery-dl \"{url}\"",shell=True, capture_output=True,text=True,timeout=3600)
+        except subprocess.TimeoutExpired:
+            output.terminate()
+            logging.info("超时了")
+            return
         recode = output.returncode
         nums = 0
         res = []

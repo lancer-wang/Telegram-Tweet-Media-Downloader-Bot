@@ -134,10 +134,17 @@ class tMsgSender:
                     media_type = "document"
             # 将上传后的媒体信息添加到媒体组中，最多10个
             if len(media_group) < 10:
-                media_group.append({
-                    "type": media_type,
-                    "media": file_id,
-                })
+                if len(media_group) == 0:
+                    media_group.append({
+                        "type": media_type,
+                        "media": file_id,
+                        "caption":"#########################"
+                    })
+                else:
+                    media_group.append({
+                        "type": media_type,
+                        "media": file_id
+                    })
             else:
                 print("Media group is full. Cannot add more.")
                 break
@@ -148,8 +155,7 @@ class tMsgSender:
         # 定义要发送的请求的参数，使用json格式
         request_params = {
             "chat_id": chat_id,
-            "media": media_group,
-            "caption":"-----------------------"
+            "media": media_group
         }
 
         # 发送请求，并获取响应

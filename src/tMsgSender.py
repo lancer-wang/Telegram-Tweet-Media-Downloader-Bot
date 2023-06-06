@@ -104,7 +104,8 @@ class tMsgSender:
         # 定义要发送的请求的参数，使用json格式
         request_params = {
             "chat_id": chat_id,
-            "media": media_group
+            "media": media_group,
+            "caption":"-----------------------"
         }
 
         # 发送请求，并获取响应

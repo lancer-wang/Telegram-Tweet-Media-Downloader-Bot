@@ -1,10 +1,45 @@
 import requests
 import asyncio
-import logging
+import logging,sqlite3,os
 import telegram,time
 from telegram import InputMediaPhoto, InputMediaVideo, InputMediaDocument
 
-
+def get_db3():
+    if not os.path.exists("/etc/twmedia.db"):
+        con = sqlite3.connect("/etc/twmedia.db")
+        cur = con.cursor()
+        sql = """CREATE TABLE IF NOT EXISTS `twmedia_new`  (
+  `id` INTEGER PRIMARY KEY AUTOINCREMENT,
+  `file_id` varchar(255)  NULL DEFAULT NULL,
+  `file_path` varchar(255)  NULL DEFAULT NULL
+)"""
+        cur.execute(sql)
+        cur.close()
+        con.close()
+    con2 = sqlite3.connect("/etc/twmedia.db")
+    return con2
+def insert_db2(file_id, file_path):
+    db = get_db3()
+    cursor = db.cursor()
+    insert_sql = """insert into twmedia_new(file_id, file_path) VALUES ("{0}","{1}")""".format(file_id, file_path)
+    cursor.execute(insert_sql)
+    db.commit()
+    cursor.close()
+    db.close()
+def select_db2(file_path):
+    db = get_db3()
+    cursor = db.cursor()
+    insert_sql = """select file_id From twmedia_new where file_path = "{0}" limit 1 """.format(file_path)
+    cursor.execute(insert_sql)
+    res = cursor.fetchall()
+    cursor.close()
+    db.close()
+    if res:
+        return res[0][0]
+    else:
+        return "nares"
+    
+    # logging.info("数据添加成功")
 class recievedData:
     def __init__(self, isOk: bool, isErr: bool = False, statusCode: int = -1, content: bytes = bytearray(0), errDetails: str = ""):
         self.ok: bool = isOk
@@ -60,34 +95,43 @@ class tMsgSender:
 
         # 遍历本地媒体列表，根据文件类型上传文件，并获取file_id
         for media in file_paths:
-            # 判断文件类型，如果是图片，使用sendPhoto方法和photo参数
-            if media.endswith(".jpg"):
-                upload_files = {
-                    "photo": open(media, "rb")
-                }
-                response = requests.post(
-                    upload_url_photo, data=upload_params, files=upload_files)
-                file_id = response.json()["result"]["photo"][-1]["file_id"]
-                media_type = "photo"
-            # 判断文件类型，如果是视频，使用sendVideo方法和video参数
-            elif media.endswith(".mp4"):
-                upload_files = {
-                    "video": open(media, "rb")
-                }
-                response = requests.post(
-                    upload_url_video, data=upload_params, files=upload_files)
-                file_id = response.json()["result"]["video"]["file_id"]
-                media_type = "video"
-            # 如果文件类型不是图片或视频，跳过该文件，并打印提示信息
+            file_id = select_db2(media)
+            if file_id == "nares":
+                # 判断文件类型，如果是图片，使用sendPhoto方法和photo参数
+                if media.endswith(".jpg"):
+                    upload_files = {
+                        "photo": open(media, "rb")
+                    }
+                    response = requests.post(
+                        upload_url_photo, data=upload_params, files=upload_files)
+                    file_id = response.json()["result"]["photo"][-1]["file_id"]
+                    media_type = "photo"
+                # 判断文件类型，如果是视频，使用sendVideo方法和video参数
+                elif media.endswith(".mp4"):
+                    upload_files = {
+                        "video": open(media, "rb")
+                    }
+                    response = requests.post(
+                        upload_url_video, data=upload_params, files=upload_files)
+                    file_id = response.json()["result"]["video"]["file_id"]
+                    media_type = "video"
+                # 如果文件类型不是图片或视频，跳过该文件，并打印提示信息
+                else:
+                    upload_files = {
+                        "document": open(media, "rb")
+                    }
+                    response = requests.post(
+                        upload_url_document, data=upload_params, files=upload_files)
+                    file_id = response.json()["result"]["document"]["file_id"]
+                    media_type = "document"
+                insert_db2(file_id,media)
             else:
-                upload_files = {
-                    "document": open(media, "rb")
-                }
-                response = requests.post(
-                    upload_url_document, data=upload_params, files=upload_files)
-                file_id = response.json()["result"]["document"]["file_id"]
-                media_type = "document"
-
+                if media.endswith(".jpg"):
+                    media_type = "photo"
+                elif media.endswith(".mp4"):
+                    media_type = "video"
+                else:
+                    media_type = "document"
             # 将上传后的媒体信息添加到媒体组中，最多10个
             if len(media_group) < 10:
                 media_group.append({
@@ -110,7 +154,7 @@ class tMsgSender:
 
         # 发送请求，并获取响应
         response = requests.post(request_url, json=request_params)
-        time.sleep(30)
+        time.sleep(10)
         logging.info(response)
 
     async def sendMultipleFiles2(self, file_paths, chat_id: str, sem):

@@ -94,6 +94,7 @@ class tMsgText:
                 logging.info(outs)
                 res = []
                 nums = 0
+                outs.reverse()
                 for out in outs:
                     nums +=1
                     if out == "":

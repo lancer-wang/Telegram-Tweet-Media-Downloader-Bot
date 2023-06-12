@@ -98,7 +98,7 @@ class tMsgSender:
             file_id = select_db2(media)
             if file_id == "nares":
                 # 判断文件类型，如果是图片，使用sendPhoto方法和photo参数
-                if media.endswith(".jpg"):
+                if media.endswith((".png", ".jpg", ".jpeg")):
                     upload_files = {
                         "photo": open(media, "rb")
                     }
@@ -107,7 +107,7 @@ class tMsgSender:
                     file_id = response.json()["result"]["photo"][-1]["file_id"]
                     media_type = "photo"
                 # 判断文件类型，如果是视频，使用sendVideo方法和video参数
-                elif media.endswith(".mp4"):
+                elif media.endswith((".mp4", ".avi", ".mov")):
                     upload_files = {
                         "video": open(media, "rb")
                     }

@@ -88,7 +88,7 @@ class tMsgText:
         # tg 有速率限制，似乎是一分钟20个
         # sem = asyncio.Semaphore(2)
         # tasks = []
-        if output.returncode == 0 and self.conf.sendTg == "2" and self.conf.cChatid !="":
+        if (output.returncode == 0 or output.returncode == 4) and self.conf.sendTg == "2" and self.conf.cChatid !="":
             try:
                 outs = output.stdout.replace("#","").replace(" ","").split("\n")
                 logging.info(outs)
@@ -120,6 +120,9 @@ class tMsgText:
         # return (url, recode)
         match recode:
             case 0: 
+                logging.info(f"Replying success for {url} to userID {self.isfrom['id']}")
+                self.reply([True, url])
+            case 4: 
                 logging.info(f"Replying success for {url} to userID {self.isfrom['id']}")
                 self.reply([True, url])
             case _: 

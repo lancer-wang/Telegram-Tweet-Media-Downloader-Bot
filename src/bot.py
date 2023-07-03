@@ -55,9 +55,9 @@ class bot:
         self.getBotInfo()
         while True:
             # fetch all the new messages from Telegram servers
-            logging.info("Sending off to wait for new data")
+            # logging.info("Sending off to wait for new data")
             response: messageInfo = self.fetcher.fetchMessages(self.msgOffset)
-            logging.info("Received new Telegram data")
+            # logging.info("Received new Telegram data")
             match response.tResponseOk:
                 case True:
                     logging.info("Telegram response was OK")

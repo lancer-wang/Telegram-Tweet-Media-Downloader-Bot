@@ -60,7 +60,7 @@ class bot:
             # logging.info("Received new Telegram data")
             match response.tResponseOk:
                 case True:
-                    logging.info("Telegram response was OK")
+                    # logging.info("Telegram response was OK")
                     list(map(lambda x: self.handleMessage(x), response.tResult))
                 case _:
                     logging.warning(f"Telegram response indicated error! {response.errCode} - {response.errDesc}")

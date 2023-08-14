@@ -88,8 +88,11 @@ class tMsgText:
         # tg 有速率限制，似乎是一分钟20个
         # sem = asyncio.Semaphore(2)
         # tasks = []
+        logging.info("returncode")
+        # if output.returncode == 1:
+        #     logging.info(output.stdout)
         logging.info(output.returncode)
-        if (output.returncode == 0 or output.returncode == 4) and self.conf.sendTg == "2" and self.conf.cChatid !="":
+        if (output.returncode == 0 or output.returncode == 4 or output.returncode == 1) and self.conf.sendTg == "2" and self.conf.cChatid !="":
             try:
                 outs = output.stdout.replace("#","").replace(" ","").split("\n")
                 logging.info(outs)
